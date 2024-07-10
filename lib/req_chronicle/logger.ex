@@ -10,7 +10,7 @@ defmodule ReqChronicle.Logger do
   """
   @spec log_request(Req.Request.t()) :: Req.Request.t()
   def log_request(request) do
-    Logger.info(">>> Chronicle -- Request: #{inspect(request)}")
+    Logger.info(">>> Chronicle -- Request: #{inspect(request, pretty: true)}")
     request
   end
 
@@ -19,7 +19,7 @@ defmodule ReqChronicle.Logger do
   """
   @spec log_response({request, response}) :: {request, response} when request: Req.Request.t(), response: Req.Response.t()
   def log_response({request, response}) do
-    Logger.info(">>> Chronicle -- Response: #{inspect(response)}")
+    Logger.info(">>> Chronicle -- Response: #{inspect(response, pretty: true)}")
     {request, response}
   end
 end
