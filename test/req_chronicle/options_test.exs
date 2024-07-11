@@ -3,6 +3,9 @@ defmodule ReqChronicle.OptionsTest do
 
   alias ReqChronicle.Options
 
+  defmodule TestRepo do
+  end
+
   describe "validate/1" do
     test "validates correct options" do
       opts = [
@@ -15,7 +18,7 @@ defmodule ReqChronicle.OptionsTest do
             enabled: true,
             schema: MyApp.ResponseSchema
           ],
-          repo: MyApp.Repo
+          repo: ReqChronicle.OptionsTest.TestRepo
         ],
         logging: [
           requests: true,
@@ -30,7 +33,7 @@ defmodule ReqChronicle.OptionsTest do
       assert validated[:persistence][:requests][:schema] == MyApp.RequestSchema
       assert validated[:persistence][:responses][:enabled]
       assert validated[:persistence][:responses][:schema] == MyApp.ResponseSchema
-      assert validated[:persistence][:repo] == MyApp.Repo
+      assert validated[:persistence][:repo] == ReqChronicle.OptionsTest.TestRepo
       assert validated[:logging][:requests]
       assert validated[:logging][:responses]
     end
@@ -69,7 +72,7 @@ defmodule ReqChronicle.OptionsTest do
             enabled: true,
             schema: MyApp.ResponseSchema
           ],
-          repo: MyApp.Repo
+          repo: ReqChronicle.OptionsTest.TestRepo
         ],
         logging: [
           requests: true,
@@ -93,7 +96,7 @@ defmodule ReqChronicle.OptionsTest do
           responses: [
             enabled: true
           ],
-          repo: MyApp.Repo
+          repo: ReqChronicle.OptionsTest.TestRepo
         ],
         logging: [
           requests: true,
@@ -119,7 +122,7 @@ defmodule ReqChronicle.OptionsTest do
             enabled: true,
             schema: MyApp.ResponseSchema
           ],
-          repo: MyApp.Repo
+          repo: ReqChronicle.OptionsTest.TestRepo
         ],
         logging: [
           requests: true,
@@ -141,7 +144,7 @@ defmodule ReqChronicle.OptionsTest do
           responses: [
             schema: MyApp.ResponseSchema
           ],
-          repo: MyApp.Repo
+          repo: ReqChronicle.OptionsTest.TestRepo
         ],
         logging: [
           level: :info

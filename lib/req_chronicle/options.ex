@@ -103,10 +103,9 @@ defmodule ReqChronicle.Options do
         raise ArgumentError, "You must provide a Repo module for storing requests and responses"
       end
 
-      # TODO: Need to get this to work nicely with tests
-      # unless Code.loaded?(repo_module) do
-      #   raise ArgumentError, "The Repo module you provided is not loaded"
-      # end
+      unless Code.loaded?(repo_module) do
+        raise ArgumentError, "The Repo module you provided is not loaded"
+      end
     end
 
     if validated_options[:persistence][:requests][:enabled] && !validated_options[:persistence][:requests][:schema] do
@@ -115,6 +114,10 @@ defmodule ReqChronicle.Options do
 
     if validated_options[:persistence][:responses][:enabled] && !validated_options[:persistence][:responses][:schema] do
       raise ArgumentError, "You must provide a schema for storing responses"
+    end
+
+    if validated_options[:persistence][:responses][:enabled] && !validated_options[:persistence][:requests][:enabled] do
+      raise ArgumentError, "You must enable request persistence to enable response persistence"
     end
 
     validated_options

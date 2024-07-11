@@ -1,6 +1,8 @@
 defmodule ReqChronicleTest do
   use ExUnit.Case, async: true
 
+  alias ReqChronicleTest.TestRepo
+
   setup do
     bypass = Bypass.open()
     {:ok, bypass: bypass}
@@ -111,7 +113,7 @@ defmodule ReqChronicleTest do
         persistence: [
           requests: [enabled: true, schema: ReqChronicleTest.TestSchema],
           responses: [enabled: true, schema: ReqChronicleTest.TestSchema],
-          repo: __MODULE__.Repo
+          repo: ReqChronicleTest.TestRepo
         ],
         logging: [
           requests: true,
