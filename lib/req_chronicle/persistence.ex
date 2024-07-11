@@ -3,6 +3,7 @@ defmodule ReqChronicle.Persistence do
   Provides mechanisms for persisting requests and responses.
   """
 
+  @type schema_id :: non_neg_integer() | Ecto.UUID.t()
   @type body_handler :: (iodata() | Enumerable.t() | nil -> String.t())
 
   @type request_params :: %{
@@ -16,7 +17,8 @@ defmodule ReqChronicle.Persistence do
   @type response_params :: %{
           status_code: String.t(),
           headers: map(),
-          body: String.t()
+          body: String.t(),
+          request_id: schema_id()
         }
 
   @doc """
@@ -33,6 +35,8 @@ defmodule ReqChronicle.Persistence do
     inserted_request = schema |> schema.changeset(params) |> repo.insert!()
 
     # Return the request
+    # We put the inserted request ID into the private fields of the request so that it can be accessed
+    # when handling the response.
     Req.Request.put_private(request, :chronicle_request_id, inserted_request.id)
   end
 
@@ -44,10 +48,11 @@ defmodule ReqChronicle.Persistence do
     schema = response_schema(request)
     repo = persistence_repo(request)
 
+    # We need the request ID to associate the response with the request
     request_id = Req.Request.get_private(request, :chronicle_request_id)
 
     body_handler = response_body_handler(request)
-    params = response |> build_response_params(body_handler) |> Map.put(:request_id, request_id)
+    params = build_response_params(response, body_handler, request_id)
 
     _inserted_response = schema |> schema.changeset(params) |> repo.insert!()
 
@@ -83,8 +88,8 @@ defmodule ReqChronicle.Persistence do
     }
   end
 
-  @spec build_response_params(Req.Response.t(), body_handler()) :: response_params()
-  def build_response_params(response, body_handler) do
+  @spec build_response_params(Req.Response.t(), body_handler(), schema_id()) :: response_params()
+  def build_response_params(response, body_handler, request_id) do
     status_code = Integer.to_string(response.status)
     headers = Map.new(response.headers)
     body = body_handler.(response.body)
@@ -92,7 +97,8 @@ defmodule ReqChronicle.Persistence do
     %{
       status_code: status_code,
       headers: headers,
-      body: body
+      body: body,
+      request_id: request_id
     }
   end
 

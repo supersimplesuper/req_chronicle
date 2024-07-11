@@ -18,15 +18,32 @@ defmodule ReqChronicle do
   defmacro __using__(opts) do
     quote do
       @opts Options.validate(unquote(opts))
-      def attach(req), do: ReqChronicle.attach(req, @opts)
+      def attach(req) do
+        ReqChronicle.attach_req_steps(req, @opts)
+      end
     end
   end
 
+  @doc """
+  Attaches the Chronicle middleware to the request.
+  """
   @spec attach(req, keyword()) :: req when req: Req.Request.t()
   def attach(req, opts) do
+    options = Options.validate(opts)
+    attach_req_steps(req, options)
+  end
+
+  @doc """
+  Attaches the request steps to the request.
+
+  WARNING:
+  This function is not intended to be called directly. Use `attach/2` instead.
+  No validation is performed on the options passed into this function.
+  """
+  def attach_req_steps(req, options) do
     req
     |> Req.Request.register_options([:chronicle])
-    |> Req.Request.merge_options(chronicle: opts)
+    |> Req.Request.merge_options(chronicle: options)
     |> maybe_attach_request_logger()
     |> maybe_attach_response_logger()
     |> maybe_attach_request_persistence()
