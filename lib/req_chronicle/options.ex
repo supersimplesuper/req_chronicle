@@ -103,8 +103,10 @@ defmodule ReqChronicle.Options do
         raise ArgumentError, "You must provide a Repo module for storing requests and responses"
       end
 
-      unless Code.ensure_loaded?(repo_module) do
-        raise ArgumentError, "The Repo module you provided is not loaded"
+      # Check that the repo module has actually been compiled in the Application
+      case Code.ensure_compiled(repo_module) do
+        {:module, _} -> :ok
+        _ -> raise ArgumentError, "The Repo module you provided is not loaded"
       end
     end
 
