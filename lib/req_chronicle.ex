@@ -18,7 +18,9 @@ defmodule ReqChronicle do
   defmacro __using__(opts) do
     quote do
       @opts Options.validate(unquote(opts))
-      def attach(req) do
+
+      @spec attach_chronicle(Req.Request.t()) :: Req.Request.t()
+      def attach_chronicle(req) do
         ReqChronicle.attach_req_steps(req, @opts)
       end
     end
@@ -27,8 +29,8 @@ defmodule ReqChronicle do
   @doc """
   Attaches the Chronicle middleware to the request.
   """
-  @spec attach(req, keyword()) :: req when req: Req.Request.t()
-  def attach(req, opts) do
+  @spec attach_chronicle(req, keyword()) :: req when req: Req.Request.t()
+  def attach_chronicle(req, opts) do
     options = Options.validate(opts)
     attach_req_steps(req, options)
   end

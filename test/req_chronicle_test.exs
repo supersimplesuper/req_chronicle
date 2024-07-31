@@ -43,7 +43,7 @@ defmodule ReqChronicleTest do
       opts = ReqChronicle.Options.validate(opts)
 
       req = Req.new(url: "http://localhost:#{bypass.port}/test")
-      req = ReqChronicle.attach(req, opts)
+      req = ReqChronicle.attach_chronicle(req, opts)
 
       assert Enum.any?(req.request_steps, fn {name, _} -> name == :chronicle_request_logging end)
       assert Enum.any?(req.response_steps, fn {name, _} -> name == :chronicle_response_logging end)
@@ -71,7 +71,7 @@ defmodule ReqChronicleTest do
       opts = ReqChronicle.Options.validate(opts)
 
       req = Req.new(url: "http://localhost:#{bypass.port}/test")
-      req = ReqChronicle.attach(req, opts)
+      req = ReqChronicle.attach_chronicle(req, opts)
 
       assert Enum.any?(req.request_steps, fn {name, _} -> name == :chronicle_request_persistence end)
       assert Enum.any?(req.response_steps, fn {name, _} -> name == :chronicle_response_persistence end)
@@ -97,7 +97,7 @@ defmodule ReqChronicleTest do
       ]
 
       req = Req.new(url: "http://localhost:#{bypass.port}/test")
-      req = ReqChronicle.attach(req, opts)
+      req = ReqChronicle.attach_chronicle(req, opts)
 
       refute Enum.any?(req.request_steps, fn {name, _} -> String.starts_with?(to_string(name), "chronicle_") end)
       refute Enum.any?(req.response_steps, fn {name, _} -> String.starts_with?(to_string(name), "chronicle_") end)
@@ -126,7 +126,7 @@ defmodule ReqChronicleTest do
     end
 
     test "defines attach/2 function" do
-      assert function_exported?(TestModule, :attach, 1)
+      assert function_exported?(TestModule, :attach_chronicle, 1)
     end
 
     test "attach function works correctly", %{bypass: bypass} do
@@ -135,7 +135,7 @@ defmodule ReqChronicleTest do
       end)
 
       req = Req.new(url: "http://localhost:#{bypass.port}/test")
-      req = TestModule.attach(req)
+      req = TestModule.attach_chronicle(req)
 
       assert Enum.any?(req.request_steps, fn {name, _} -> String.starts_with?(to_string(name), "chronicle_") end)
       assert Enum.any?(req.response_steps, fn {name, _} -> String.starts_with?(to_string(name), "chronicle_") end)
