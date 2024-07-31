@@ -103,7 +103,7 @@ defmodule ReqChronicle.Options do
         raise ArgumentError, "You must provide a Repo module for storing requests and responses"
       end
 
-      unless Code.loaded?(repo_module) do
+      unless Code.ensure_loaded?(repo_module) do
         raise ArgumentError, "The Repo module you provided is not loaded"
       end
     end
