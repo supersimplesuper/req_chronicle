@@ -102,7 +102,7 @@ defmodule ReqChronicle.Persistence do
     body = body_handler.(response.body)
 
     %{
-      status_code: status_code,
+      status: status_code,
       headers: headers,
       body: body,
       request_id: request_id
