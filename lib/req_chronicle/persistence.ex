@@ -31,8 +31,11 @@ defmodule ReqChronicle.Persistence do
     body_handler = request_body_handler(request)
     params = build_request_params(request, body_handler)
 
-    # Build a changeset and insert the schema into the provided Repo
-    inserted_request = schema |> schema.changeset(params) |> repo.insert!()
+    record = struct(schema)
+    changeset = apply(schema, :changeset, [record, params])
+
+    # Insert the changeset
+    inserted_request = apply(repo, :insert!, [changeset])
 
     # Return the request
     # We put the inserted request ID into the private fields of the request so that it can be accessed
@@ -54,7 +57,11 @@ defmodule ReqChronicle.Persistence do
     body_handler = response_body_handler(request)
     params = build_response_params(response, body_handler, request_id)
 
-    _inserted_response = schema |> schema.changeset(params) |> repo.insert!()
+    record = struct(schema)
+    changeset = apply(schema, :changeset, [record, params])
+
+    # Insert the changeset
+    _inserted_response = apply(repo, :insert!, [changeset])
 
     {request, response}
   end

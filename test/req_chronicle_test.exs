@@ -12,8 +12,18 @@ defmodule ReqChronicleTest do
     @moduledoc false
     use Ecto.Schema
 
-    def changeset(_model, _attrs) do
-      %Ecto.Changeset{}
+    import Ecto.Changeset
+
+    embedded_schema do
+      field(:url, :string)
+      field(:body, :string)
+      field(:headers, {:array, :string})
+    end
+
+    def changeset(model, attrs) do
+      model
+      |> cast(attrs, [:url, :body, :headers])
+      |> validate_required([:url, :body])
     end
   end
 
