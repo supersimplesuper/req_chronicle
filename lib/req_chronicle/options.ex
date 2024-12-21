@@ -5,7 +5,13 @@ defmodule ReqChronicle.Options do
 
   body_handler_definition = [
     type: :mfa,
-    default: {Kernel, :inspect, []},
+    default: {Kernel, :inspect, [
+      [
+        limit: :infinity,
+        pretty: true,
+        printable_limit: :infinity
+      ]
+    ]},
     doc:
       "An MFA tuple that handles request abd response bodies before persistence. The function must accept a request or response as it's first argument, and return a string."
   ]
