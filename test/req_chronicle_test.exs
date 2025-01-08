@@ -116,6 +116,47 @@ defmodule ReqChronicleTest do
     end
   end
 
+  describe "with custom persistence callback" do
+    defmodule TestCallback do
+      @moduledoc false
+      def custom(repo, schema, _params) do
+        assert repo == TestRepo
+        assert schema == TestSchema
+
+        %{id: 1}
+      end
+    end
+
+    test "invokes persistence callback when provided", %{bypass: bypass} do
+      Bypass.expect_once(bypass, "GET", "/test", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      opts = [
+        persistence: [
+          requests: [enabled: true, schema: TestSchema],
+          responses: [enabled: true, schema: TestSchema],
+          repo: TestRepo,
+          persistence_callback: {TestCallback, :custom}
+        ],
+        logging: [
+          requests: false,
+          responses: false
+        ]
+      ]
+
+      opts = ReqChronicle.Options.validate(opts)
+
+      req = Req.new(url: "http://localhost:#{bypass.port}/test")
+      req = ReqChronicle.attach_chronicle(req, opts)
+
+      assert Enum.any?(req.request_steps, fn {name, _} -> name == :chronicle_request_persistence end)
+      assert Enum.any?(req.response_steps, fn {name, _} -> name == :chronicle_response_persistence end)
+
+      Req.get!(req)
+    end
+  end
+
   describe "__using__/1" do
     defmodule TestModule do
       @moduledoc false

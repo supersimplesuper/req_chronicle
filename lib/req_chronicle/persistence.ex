@@ -31,11 +31,15 @@ defmodule ReqChronicle.Persistence do
     body_handler = request_body_handler(request)
     params = build_request_params(request, body_handler)
 
-    record = struct(schema)
-    changeset = apply(schema, :changeset, [record, params])
-
     # Insert the changeset
-    inserted_request = apply(repo, :insert!, [changeset])
+    inserted_request =
+      case persistence_callback(request) do
+        nil ->
+          do_persistence(repo, schema, params)
+
+        {mod, fun} ->
+          apply(mod, fun, [repo, schema, params])
+      end
 
     # Return the request
     # We put the inserted request ID into the private fields of the request so that it can be accessed
@@ -57,11 +61,14 @@ defmodule ReqChronicle.Persistence do
     body_handler = response_body_handler(request)
     params = build_response_params(response, body_handler, request_id)
 
-    record = struct(schema)
-    changeset = apply(schema, :changeset, [record, params])
+    _inserted_response =
+      case persistence_callback(request) do
+        nil ->
+          do_persistence(repo, schema, params)
 
-    # Insert the changeset
-    _inserted_response = apply(repo, :insert!, [changeset])
+        {mod, fun} ->
+          apply(mod, fun, [repo, schema, params])
+      end
 
     {request, response}
   end
@@ -109,10 +116,20 @@ defmodule ReqChronicle.Persistence do
     }
   end
 
+  defp do_persistence(repo, schema, params) do
+    record = struct(schema)
+    changeset = apply(schema, :changeset, [record, params])
+
+    # Insert the changeset
+    apply(repo, :insert!, [changeset])
+  end
+
   defp persistence_repo(request), do: request |> persistence_options() |> Keyword.get(:repo)
+  defp persistence_callback(request), do: request |> persistence_options() |> Keyword.get(:persistence_callback)
+  defp persistence_options(request), do: get_in(request.options, [:chronicle, :persistence])
+
   defp request_schema(request), do: request |> request_options() |> Keyword.get(:schema)
   defp response_schema(request), do: request |> response_options() |> Keyword.get(:schema)
-  defp persistence_options(request), do: get_in(request.options, [:chronicle, :persistence])
   defp request_options(request), do: get_in(request.options, [:chronicle, :persistence, :requests])
   defp response_options(request), do: get_in(request.options, [:chronicle, :persistence, :responses])
 end
