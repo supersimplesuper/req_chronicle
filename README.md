@@ -101,6 +101,36 @@ YourApp.ApiClient.make_request("https://api.example.com/data")
 
 This will make the request using Req, and ReqChronicle will log and persist the request and response based on your configuration.
 
+## Changing default persistence
+
+ReqChronicle will use the provided schema to store the request and response data synchronously if persistence is enabled. As a consequence, the database can become a bottleneck if a large number of requests are made in a short period of time.
+
+ReqChronicle provides a `:persistence_callback` option that is called instead of the default persistence logic. This persistence callback options should be a tuple with the module and function name to call, such as `{YourApp.Chronicle, :do_persist}`.
+
+```elixir
+  use ReqChronicle,
+    persistence: [
+      requests: [
+        enabled: true,
+        schema: YourApp.ChronicleRequest
+      ],
+      responses: [
+        enabled: true,
+        schema: YourApp.ChronicleResponse
+      ],
+      repo: YourApp.Repo,
+      persistence_callback: {YourApp.Chronicle, :do_persist}
+    ],
+```
+
+This will call the function with the following arguments:
+
+- The repo module (e.g. `YourApp.Repo`).
+- The schema (e.g. `YourApp.ChronicleRequest` or `YourApp.ChronicleResponse`).
+- The parameters associated with the schema.
+
+This function should return the ID of the newly created record. However, if the persistence is asynchronous, it is strongly advised that the ID be generated beforehand.
+
 # Help
 
 You can adjust the configuration options to enable/disable logging or persistence, change log levels, or provide custom body handlers as needed.
