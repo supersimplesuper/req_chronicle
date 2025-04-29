@@ -5,15 +5,17 @@ defmodule ReqChronicle.Options do
 
   body_handler_definition = [
     type: :mfa,
-    default: {Kernel, :inspect, [
-      [
-        limit: :infinity,
-        pretty: true,
-        printable_limit: :infinity
-      ]
-    ]},
+    default:
+      {Kernel, :inspect,
+       [
+         [
+           limit: :infinity,
+           pretty: true,
+           printable_limit: :infinity
+         ]
+       ]},
     doc:
-      "An MFA tuple that handles request abd response bodies before persistence. The function must accept a request or response as it's first argument, and return a string."
+      "An MFA tuple that handles request and response bodies before persistence. The function must accept a request or response as it's first argument, and return a string."
   ]
 
   schema_definition = [
@@ -73,6 +75,14 @@ defmodule ReqChronicle.Options do
       type: :atom,
       required: false,
       doc: "The Repo module to use for storing requests and responses."
+    ],
+    persistence_callback: [
+      type: :mod_arg,
+      required: false,
+      doc: ~s(
+        An module argument that is called instead of default persistence. Its arguments will be the configured repo,
+        schema, record, andd parameters and should return the inserted record with an ID.
+      )
     ]
   ]
 
